@@ -1,7 +1,7 @@
 package org.terraform.common
 
 class CloneRepo {
-    static void cloneRepo(String repoUrl, def steps, String branch = 'main', String credentialsId = null) {
+    static void cloneRepo(String repoUrl, def steps, String branch = 'branch', String credentialsId = null) {
         try {
             steps.echo "Cloning repository: ${repoUrl} on branch: ${branch}"
             if (credentialsId) {
