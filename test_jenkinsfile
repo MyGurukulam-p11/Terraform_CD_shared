@@ -2,30 +2,48 @@
 
 pipeline {
     agent any
+
     parameters {
-        string(name: 'URL', defaultValue: 'https://github.com/Pritam1705/Terraform_infra.git', description: 'Repository URL for checkout')
-        string(name: 'WORKSPACE_DIR', defaultValue: '/var/lib/jenkins/workspace/pratice1/Terraform_infra', description: 'Workspace directory for Terraform')
+        string(
+            name: 'REPO_URL', 
+            defaultValue: 'https://github.com/MyGurukulam-p11/infrastructure_p11.git', 
+            description: 'Repository URL to clone'
+        )
+        string(
+            name: 'WORKSPACE_DIR', 
+            defaultValue: '/var/lib/jenkins/workspace/pratice1/env/dev/application/attendance', 
+            description: 'Workspace directory for Terraform'
+        )
+        choice(
+            name: 'ACTION', 
+            choices: ['apply', 'destroy'], 
+            description: 'Choose whether to apply or destroy the Terraform infrastructure'
+        )
     }
+
     stages {
         stage('Clean Workspace') {
             steps {
                 cleanWs() 
             }
         }
-        stage('Clone Role') {
+
+        stage('Clone Repository') {
             steps {
                 script {
-                    cloneRepo(params.URL) 
+                    cloneRepo(params.REPO_URL, branch: 'Priyanshu_scrum_223', credentialsId: 'Devops-repo-cred')
                 }
             }
         }
+
         stage('Terraform Init') {
             steps {
                 script {
-                    init(this, params.WORKSPACE_DIR) // Use the parameterized workspace directory
+                    init(this, params.WORKSPACE_DIR) 
                 }
             }
         }
+
         stage('Terraform Validate') {
             steps {
                 script {
@@ -33,6 +51,7 @@ pipeline {
                 }
             }
         }
+
         stage('Terraform Plan') {
             steps {
                 script {
@@ -40,10 +59,17 @@ pipeline {
                 }
             }
         }
-        stage('Terraform Apply') { 
+
+        stage('Terraform Action') {
             steps {
                 script {
-                    apply(this, params.WORKSPACE_DIR, true) 
+                    if (params.ACTION == 'apply') {
+                        input message: 'Approve Terraform Apply?', ok: 'Apply'
+                        apply(this, params.WORKSPACE_DIR, true) 
+                    } else if (params.ACTION == 'destroy') {
+                        input message: 'Approve Terraform Destroy?', ok: 'Destroy'
+                        destroy(this, params.WORKSPACE_DIR, true) 
+                    }
                 }
             }
         }
