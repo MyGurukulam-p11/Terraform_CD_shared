@@ -1,0 +1,16 @@
+@Library('shared_library') _
+
+def terraformCI = new org.p11combinedforce.template.terraformCI.terraformCI()
+
+node {
+    def url = 'git@github.com:MyGurukulam-p11/DEV-QA-infrastructure.git'
+    def creds = 'amit-creds'
+    def branch = 'terraform-ci-testing'
+    def rootDir = '.'
+    def subDir = ''
+    
+    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'pritam1-aws-cred']]) {
+        env.AWS_REGION = 'ap-south-1'
+        terraformCI.call(url, branch, creds, rootDir, subDir)
+    }
+}
